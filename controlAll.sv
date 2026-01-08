@@ -45,126 +45,112 @@ module controlAll (
 
         case (opcode)
 
-            // I-Type LOAD: LB, LH, LW, LBU, LHU
-            //3
+            // I-Type LOAD
             7'b0000011: begin
                 controls = 12'b1_000_1_0_0_1_01_0_0;
-                aluSel   = 5'b00000; // ADD for address calculation
+                aluSel   = 5'b00000;
             end
 
-            // I-type ALU: ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI
-            //19
+            // I-type ALU
             7'b0010011: begin
                 controls = 12'b1_000_1_0_0_0_00_0_0;
                 case ({func7, func3})
-                    10'b0000000_000: aluSel = 5'b00000; // ADDI
-                    10'b0000000_010: aluSel = 5'b01000; // SLTI
-                    10'b0000000_011: aluSel = 5'b01001; // SLTIU
-                    10'b0000000_100: aluSel = 5'b00100; // XORI
-                    10'b0000000_110: aluSel = 5'b00011; // ORI
-                    10'b0000000_111: aluSel = 5'b00010; // ANDI
-                    10'b0000000_001: aluSel = 5'b00101; // SLLI
-                    10'b0000000_101: aluSel = 5'b00110; // SRLI
-                    10'b0100000_101: aluSel = 5'b00111; // SRAI
+                    10'b0000000_000: aluSel = 5'b00000;
+                    10'b0000000_010: aluSel = 5'b01000;
+                    10'b0000000_011: aluSel = 5'b01001;
+                    10'b0000000_100: aluSel = 5'b00100;
+                    10'b0000000_110: aluSel = 5'b00011;
+                    10'b0000000_111: aluSel = 5'b00010;
+                    10'b0000000_001: aluSel = 5'b00101;
+                    10'b0000000_101: aluSel = 5'b00110;
+                    10'b0100000_101: aluSel = 5'b00111;
                 endcase
             end
             
-            // I-type ALU word instructions (RV64)
-            //27
+            // I-type ALU word
             7'b0011011: begin
-                controls = 12'b1_000_1_0_0_0_00_0_0; // regWr=1, immSrc=000, aluSrcB=1 ...
+                controls = 12'b1_000_1_0_0_0_00_0_0;
                 case ({func7[5], func3})
-                    10'b0_000: aluSel = 5'b01100; // ADDIW
-                    10'b1_000: aluSel = 5'b01011; // SUBIW
-                    10'b0_001: aluSel = 5'b01010; // SLLIW
-                    10'b0_101: aluSel = 5'b01001; // SRLIW
-                    10'b1_101: aluSel = 5'b01000; // SRAIW
-                    default:   aluSel = 5'b00000;
+                    10'b0_000: aluSel = 5'b01100;
+                    10'b1_000: aluSel = 5'b01011;
+                    10'b0_001: aluSel = 5'b01010;
+                    10'b0_101: aluSel = 5'b01001;
+                    10'b1_101: aluSel = 5'b01000;
                 endcase
             end
 
-
-            // R-type ALU: ADD, SUB, AND, OR, XOR, SLL, SRL, SRA, SLT, SLTU
-            //51
+            // R-type ALU
             7'b0110011: begin
                 controls = 12'b1_000_0_0_0_0_00_0_0;
                 case ({func7, func3})
-                    10'b0000000_000: aluSel = 5'b00000; // ADD
-                    10'b0100000_000: aluSel = 5'b00001; // SUB
-                    10'b0000000_111: aluSel = 5'b00010; // AND
-                    10'b0000000_110: aluSel = 5'b00011; // OR
-                    10'b0000000_100: aluSel = 5'b00100; // XOR
-                    10'b0000000_001: aluSel = 5'b00101; // SLL
-                    10'b0000000_101: aluSel = 5'b00110; // SRL
-                    10'b0100000_101: aluSel = 5'b00111; // SRA
-                    10'b0000000_010: aluSel = 5'b01000; // SLT
-                    10'b0000000_011: aluSel = 5'b01001; // SLTU
+                    10'b0000000_000: aluSel = 5'b00000;
+                    10'b0100000_000: aluSel = 5'b00001;
+                    10'b0000000_111: aluSel = 5'b00010;
+                    10'b0000000_110: aluSel = 5'b00011;
+                    10'b0000000_100: aluSel = 5'b00100;
+                    10'b0000000_001: aluSel = 5'b00101;
+                    10'b0000000_101: aluSel = 5'b00110;
+                    10'b0100000_101: aluSel = 5'b00111;
+                    10'b0000000_010: aluSel = 5'b01000;
+                    10'b0000000_011: aluSel = 5'b01001;
                 endcase
             end
 
-            // STORE: SB, SH, SW
-            //35
+            // STORE
             7'b0100011: begin
                 controls = 12'b0_001_1_0_1_0_00_0_0;
-                aluSel   = 5'b00000; // ADD for address
+                aluSel   = 5'b00000;
             end
 
-            // B-type BRANCH: BEQ, BNE, BLT, BGE, BLTU, BGEU
-            //99
+            // B-type BRANCH
             7'b1100011: begin
-                controls = 12'b0_010_0_0_0_0_00_1_0;
+                controls = 12'b0_010_0_1_0_0_00_1_0;
                 case (func3)
-                    3'b000: aluSel = 5'b10000; // BEQ
-                    3'b001: aluSel = 5'b10001; // BNE
-                    3'b100: aluSel = 5'b10010; // BLT
-                    3'b101: aluSel = 5'b10011; // BGE
-                    3'b110: aluSel = 5'b10100; // BLTU
-                    3'b111: aluSel = 5'b10101; // BGEU
+                    3'b000: aluSel = 5'b10000;
+                    3'b001: aluSel = 5'b10001;
+                    3'b100: aluSel = 5'b10010;
+                    3'b101: aluSel = 5'b10011;
+                    3'b110: aluSel = 5'b10100;
+                    3'b111: aluSel = 5'b10101;
                 endcase
             end
 
-            // J-type JAL
-            //111
+            // JAL 
             7'b1101111: begin
-                controls = 12'b1_011_1_0_0_0_10_0_1;
+                controls = 12'b1_011_1_1_0_0_10_0_1;
             end
 
-            //T-Type JALR
-            //103
+            // JALR
             7'b1100111: begin
                 controls = 12'b1_000_1_0_0_0_10_0_1;
             end
 
-            // U-type: LUI
-            //55
+            // LUI
             7'b0110111: begin
-                controls = 12'b1_100_0_0_0_0_00_0_0; // immSrc = U-type
-                aluSel   = 5'b00000; // Pass-through immediate
+                controls = 12'b1_100_0_0_0_0_00_0_0;
+                aluSel   = 5'b00000;
             end
 
-            // U-type: AUIPC
-            //23
+            // AUIPC
             7'b0010111: begin
-                controls = 12'b1_101_0_0_0_0_00_0_0; // immSrc = U-type for PC+imm
-                aluSel   = 5'b00000; // ALU adds PC + imm
+                controls = 12'b1_101_0_1_0_0_00_0_0;
+                aluSel   = 5'b00000;
             end
 
-            // R-type WORD (RV64W): ADDW, SUBW, SLLW, SRLW, SRAW
-            //59
+            // R-type WORD
             7'b0111011: begin
                 controls = 12'b1_000_0_0_0_0_00_0_0;
                 case (func3)
-                    3'b000: aluSel = func7[5] ? 5'b01011 : 5'b01100; // SUBW / ADDW
-                    3'b001: aluSel = 5'b01010; // SLLW
-                    3'b101: aluSel = func7[5] ? 5'b01000 : 5'b01001; // SRAW / SRLW
-                    default: aluSel = 5'b00000;
+                    3'b000: aluSel = func7[5] ? 5'b01011 : 5'b01100;
+                    3'b001: aluSel = 5'b01010;
+                    3'b101: aluSel = func7[5] ? 5'b01000 : 5'b01001;
                 endcase
             end
 
         endcase
     end
 
-    // Control decode
+    // Control signal decode
     assign { regWr, immSrc, aluSrcB, aluSrcA, dMemWr, dMemRd, resultSrc, branch_s, jump_s } = controls;
 
     // Branch decision logic
@@ -173,12 +159,12 @@ module controlAll (
         branch_taken = 1'b0;
         if (branch_s) begin
             case (func3)
-                3'b000: branch_taken =  zero;   // BEQ
-                3'b001: branch_taken = ~zero;   // BNE
-                3'b100: branch_taken =  lt;     // BLT
-                3'b101: branch_taken = ~lt;     // BGE
-                3'b110: branch_taken =  ltu;    // BLTU
-                3'b111: branch_taken = ~ltu;    // BGEU
+                3'b000: branch_taken =  zero;
+                3'b001: branch_taken = ~zero;
+                3'b100: branch_taken =  lt;
+                3'b101: branch_taken = ~lt;
+                3'b110: branch_taken =  ltu;
+                3'b111: branch_taken = ~ltu;
             endcase
         end
     end
